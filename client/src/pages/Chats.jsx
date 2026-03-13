@@ -51,20 +51,13 @@ const Chats = () => {
                         </span>
                     </div>
                     <div className="overflow-auto"></div>
-                    <div className="pb-2 px-3">
-                        <div className="flex justify-between items-center bg-slate-800 rounded-4xl py-3 px-5">
-                            <span className="flex justify-center items-center gap-1 sm:gap-3">
-                                <span className="">
-                                    <img src={landscapeIcon} alt="landscapeIcon" className="w-5 h-5 cursor-pointer sm:w-7 sm:h-7"/>
-                                </span>
-                                <span className="rounded-full">
-                                    <img />
-                                </span>
-                                <input type="text" placeholder="Type a message" className="text-white outline-0"/>
+                    <div className="pb-2 px-1 sm:px-3">
+                        <div className="flex justify-between items-center w-full bg-slate-800 rounded-4xl py-3 px-1.5 sm:px-5 md:rounded-full md:py-5 lg:py-4 lg:rounded-4xl">
+                            <span className="rounded-full pr-1">
+                                <img src={landscapeIcon} className="w-5 h-5 cursor-pointer sm:w-7 sm:h-7"/>
                             </span>
-                            <span className="rounded-full hover:bg-slate-600 transition-all duration-400 ease-in-out p-1">
-                                <img src={microphoneIcon} alt="microphone" className="w-5 h-5 cursor-pointer sm:w-7 sm:h-7"/>
-                            </span>
+                            <input type="text" placeholder="Type a message" className="w-[36vw] flex justify-center items-center outline-0 text-white text-xs sm:text-base"/>
+                            <img src={microphoneIcon} alt="" className="w-5 h-5 cursor-pointer sm:w-7 sm:h-7"/>
                         </div>
                     </div>
                 </div>
