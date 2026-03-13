@@ -12,11 +12,11 @@ connectToDB();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
-const io = new Server(server, { cors: { origin: "http://localhost:5173", credentials: true } });
+export const io = new Server(server, { cors: { origin: "http://localhost:5173", credentials: true } });
 
 io.on("connection", (socket) => {
-    console.log("Socket connect with ", socket.id);
+    
 });
 
 app.use(express.json());
-app.use("/api", userRouter);
+app.use("/api/user", userRouter);

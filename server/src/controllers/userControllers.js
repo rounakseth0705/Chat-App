@@ -32,7 +32,7 @@ export const login = async (req,res) => {
         if (!email || !password) {
             return res.json({ success: false, message: "Details missing" });
         }
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email }).populate("connectedUsers","name bio");
         if (!existingUser) {
             return res.json({ success: false, message: "Invalid mobile no. or email id" });
         }
@@ -70,6 +70,15 @@ export const generateConnectId = async (req,res) => {
         }
         await user.save();
         return res.json({ success: true, message: "Connect Id generated" });
+    } catch(error) {
+        console.log(error.message);
+        return res.json({ success: false, message: error.message });
+    }
+}
+
+export const updateProfileDetails = async (req,res) => {
+    try {
+        
     } catch(error) {
         console.log(error.message);
         return res.json({ success: false, message: error.message });

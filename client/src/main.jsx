@@ -3,6 +3,8 @@ import './index.css'
 import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './pages/Login.jsx'
+import Chats from './pages/Chats.jsx'
+import UpdateProfile from './pages/UpdateProfile.jsx'
 
 const router = createBrowserRouter([
   {
@@ -12,6 +14,14 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Login/>
+      },
+      {
+        path: "/chats",
+        element: <Chats/>
+      },
+      {
+        path: "/update-profile",
+        element: <UpdateProfile/>
       }
     ]
   }
