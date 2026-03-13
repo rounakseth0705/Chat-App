@@ -17,10 +17,6 @@ const SignUp = ({ setCurrentState }) => {
                     <input type="email" placeholder="enter email" className="outline-0 rounded px-2 py-1.5 bg-slate-600 w-[50vw] text-sm sm:py-2 sm:px-4 sm:text-base sm:w-[45vw] md:w-[40vw] lg:w-[35vw] xl:w-[25vw]"/>
                 </div>
                 <div className="flex flex-col justify-center gap-1">
-                    <h1 className="text-white">Mobile no.</h1>
-                    <input type="text" placeholder="enter mobile" className="outline-0 rounded px-2 py-1.5 bg-slate-600 w-[50vw] text-sm sm:py-2 sm:px-4 sm:text-base sm:w-[45vw] md:w-[40vw] lg:w-[35vw] xl:w-[25vw]"/>
-                </div>
-                <div className="flex flex-col justify-center gap-1">
                     <h1 className="text-white">Password</h1>
                     <input type="password" placeholder="enter password" className="outline-0 rounded px-2 py-1.5 bg-slate-600 w-[50vw] text-sm sm:py-2 sm:px-4 sm:text-base sm:w-[45vw] md:w-[40vw] lg:w-[35vw] xl:w-[25vw]"/>
                 </div>
