@@ -48,6 +48,23 @@ export const login = async (req,res) => {
     }
 }
 
+export const verifyUser = async (req,res) => {
+    try {
+        const userId = req.user._id;
+        if (!userId) {
+            return res.json({ success: false, message: "User not logged in" });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.json({ success: false, message: "Invalid credientials" });
+        }
+        return res.json({ success: true, user, message: "User logged in" });
+    } catch(error) {
+        console.log(error.message);
+        return res.json({ success: false, message: error.message });
+    }
+}
+
 export const generateConnectId = async (req,res) => {
     try {
         const userId = req.user._id;
@@ -76,9 +93,50 @@ export const generateConnectId = async (req,res) => {
     }
 }
 
+export const connectUser = async (req,res) => {
+    try {
+        const { requestedUserId } = req.body;
+        const userId = req.user._id;
+        if (!requestedUserId || !userId) {
+            return res.json({ success: false, message: "Something went wrong!" });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.json({ success: false, message: "Something went wrong!" });
+        }
+        if (!user.connectedUsers) {
+            user.connectedUsers = [requestedUserId];
+        } else {
+            user.connectedUsers.push(requestedUserId);
+        }
+        await user.save();
+        return res.json({ success: false,  message: "Request accepted" });
+    } catch(error) {
+        console.log(error.message);
+        return res.json({ success: false, message: error.message });
+    }
+}
+
 export const updateProfileDetails = async (req,res) => {
     try {
-        
+        const { name, bio } = req.body;
+        const { profileImage } = req.file;
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        if (profileImage === "") {
+            if (name && bio) {
+                user.name = name;
+                user.bio = bio;
+            } else if (name) {
+                user.name = name;
+            } else if (bio) {
+                user.bio = bio;
+            }
+        } else {
+            
+        }
+        await user.save();
+        return res.json({ success: true, message: "Details updated" });
     } catch(error) {
         console.log(error.message);
         return res.json({ success: false, message: error.message });
