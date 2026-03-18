@@ -32,9 +32,9 @@ export const login = async (req,res) => {
         if (!email || !password) {
             return res.json({ success: false, message: "Details missing" });
         }
-        const existingUser = await User.findOne({ email }).populate("connectedUsers","name bio");
+        const existingUser = await User.findOne({ email }).populate("connectedUsers","name bio profilePicUrl");
         if (!existingUser) {
-            return res.json({ success: false, message: "Invalid mobile no. or email id" });
+            return res.json({ success: false, message: "Invalid email" });
         }
         const isMatch = await bcrypt.compare(password, existingUser.password);
         if (!isMatch) {
@@ -54,7 +54,7 @@ export const verifyUser = async (req,res) => {
         if (!userId) {
             return res.json({ success: false, message: "User not logged in" });
         }
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("connectedUsers","name bio profilePicUrl");
         if (!user) {
             return res.json({ success: false, message: "Invalid credientials" });
         }
@@ -65,28 +65,30 @@ export const verifyUser = async (req,res) => {
     }
 }
 
-export const generateConnectId = async (req,res) => {
+export const sendConnectionRequest = async (req,res) => {
     try {
-        const userId = req.user._id;
-        if (!userId) {
-            return res.json({ success: false, message: "User not logged in" });
+        const { email } = req.body;
+        const senderId = req.user._id;
+        if (!email || !senderId) {
+            return res.json({ success: false, message: "Details missing" });
         }
-        const user = await User.findById(userId);
+        const user = await User.findById(senderId);
         if (!user) {
             return res.json({ success: false, message: "Something went wrong!" });
         }
-        const connectId = nanoid(10);
-        const isConnectIdExists = user?.connectId.some(userConnectId => userConnectId.id === connectId);
-        if (isConnectIdExists) {
-            return res.json({ success: false, message: "Can't generate connect id, try again!" });
+        const receiver = await User.findOne({ email });
+        if (!receiver) {
+            return res.json({ success: false, message: "Invalid email id" });
         }
-        if (!user.connectId) {
-            user.connectId = [{ id: connectId, expiresAt: new Date(Date.now() + 5*60*1000) }];
-        } else {
-            user.connectId.push({ id: connectId, expiresAt: new Date(Date.now() + 5*60*1000) });
+        if (receiver.pendingRequests.includes(senderId)) {
+            return res.json({ success: false, message: "Can't request the user again!" });
         }
-        await user.save();
-        return res.json({ success: true, message: "Connect Id generated" });
+        if (receiver.connectedUsers.includes(senderId) || user.connectedUsers.includes(receiver._id)) {
+            return res.json({});
+        }
+        receiver.pendingRequests.push(senderId);
+        await receiver.save();
+        return res.json({ success: true, message: "Request sent" });
     } catch(error) {
         console.log(error.message);
         return res.json({ success: false, message: error.message });
@@ -101,6 +103,10 @@ export const connectUser = async (req,res) => {
             return res.json({ success: false, message: "Something went wrong!" });
         }
         const user = await User.findById(userId);
+        const requestedUser = await User.findById(requestedUserId);
+        if (!requestedUser) {
+            return res.json({ success: false, message: "Something went wrong!" });
+        }
         if (!user) {
             return res.json({ success: false, message: "Something went wrong!" });
         }
@@ -109,7 +115,10 @@ export const connectUser = async (req,res) => {
         } else {
             user.connectedUsers.push(requestedUserId);
         }
+        user.pendingRequests = user.pendingRequests.filter(pendingRequest => !pendingRequest.equals(requestedUserId));
+        requestedUser.connectedUsers.push(userId);
         await user.save();
+        await requestedUser.save();
         return res.json({ success: false,  message: "Request accepted" });
     } catch(error) {
         console.log(error.message);
@@ -137,6 +146,23 @@ export const updateProfileDetails = async (req,res) => {
         }
         await user.save();
         return res.json({ success: true, message: "Details updated" });
+    } catch(error) {
+        console.log(error.message);
+        return res.json({ success: false, message: error.message });
+    }
+}
+
+export const deleteUser = async (req,res) => {
+    try {
+        const userId = req.body._id;
+        if (!userId) {
+            return res.json({ success: false, message: "Something went wrong!" });
+        }
+        const result = await User.findByIdAndDelete(userId);
+        if (!result) {
+            return res.json({ success: false, message: "Something went wrong!" });
+        }
+        return res.json({ success: true, message: "Account deleted" });
     } catch(error) {
         console.log(error.message);
         return res.json({ success: false, message: error.message });

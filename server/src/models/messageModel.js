@@ -8,7 +8,7 @@ const messageSchema = new mongoose.Schema({
     documentUrl: { type: String },
     imageUrl: { type: String },
     seen: { type: Boolean, required: true, default: false }
-});
+},{ timestamps: true });
 
 const Message = mongoose.model("message", messageSchema);
 

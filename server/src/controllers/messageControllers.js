@@ -4,6 +4,7 @@ import Message from "../models/messageModel.js";
 export const sendMessage = async (req,res) => {
     try {
         const { receiverId, text } = req.body;
+        const image = req.file;
         const senderId = req.user._id;
         if (!receiverId || !senderId) {
             return res.json({ success: false, message: "Something went wrong!" });

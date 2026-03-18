@@ -18,11 +18,14 @@ export const io = new Server(server, { cors: { origin: "http://localhost:5173", 
 export const userSocketIds = {};
 
 io.on("connection", (socket) => {
-    console.log(socket.id);
-    userSocketIds[socket.handshake.query.userId] = socket.id;
+    const userId = socket.handshake.query.userId;
+    if (userId) {
+        userSocketIds[userId] = socket.id;
+    }
+    socket.on("disconnect", () => {
+        delete userSocketIds[userId];
+    });
 });
-
-console.log(userSocketIds);
 
 app.use(express.json());
 app.use("/api/user", userRouter);

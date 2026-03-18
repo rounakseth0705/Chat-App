@@ -3,6 +3,7 @@ import API from "../config/api.js";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { io } from "socket.io-client";
 
 export const UserContext = createContext();
 
@@ -10,16 +11,26 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [socket, setSocket] = useState(null);
     const navigate = useNavigate();
+    const connectToSocket = (userId) => {
+        if (!userId) {
+            toast.error("Can't load chats");
+            return;
+        }
+        const newSocket = io(import.meta.env.VITE_BACKEND_URL, { query: { userId } });
+        setSocket(newSocket);
+    }
     const signUp = async (name,email,password) => {
         try {
-            const response = await API.post("/user/register", { name, email, password });
+            const response = await API.post("/api/user/register", { name, email, password });
             if (response) {
                 if (response.data.success) {
                     localStorage.setItem("token", response.data.token);
                     setUser(response.data.user);
                     setToken(response.data.token);
                     setIsLoggedIn(true);
+                    connectToSocket(response.data.user._id);
                     navigate("chats");
                     toast.success(response.data.message);
                 } else {
@@ -34,13 +45,14 @@ const AuthProvider = ({ children }) => {
     }
     const login = async (email,password) => {
         try {
-            const response = await API.post("/user/login", { email, password });
+            const response = await API.post("/api/user/login", { email, password });
             if (response) {
                 if (response.data.success) {
                     localStorage.setItem("token", response.data.token);
                     setUser(response.data.user);
                     setToken(response.data.token);
                     setIsLoggedIn(true);
+                    connectToSocket(response.data.user._id);
                     navigate("chats");
                     toast.success(response.data.message);
                 } else {
@@ -59,6 +71,7 @@ const AuthProvider = ({ children }) => {
             setUser(null);
             setToken(null);
             setIsLoggedIn(false);
+            socket.disconnect();
             navigate("/");
             toast.success("Logged out successfully");
         } catch(error) {
@@ -71,11 +84,12 @@ const AuthProvider = ({ children }) => {
             if (!token) {
                 return;
             }
-            const response = await API.get("/user/verify-user");
+            const response = await API.get("/api/user/verify-user");
             if (response) {
                 if (response.data.success) {
                     setUser(response.data.user);
                     setIsLoggedIn(true);
+                    connectToSocket(response.data.user._id);
                 } else {
                     logout();
                     toast.error(response.data.message);
@@ -91,7 +105,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         verifyUser();
     },[]);
-    const value = { user, isLoggedIn, signUp, login, verifyUser, logout };
+    const value = { user, isLoggedIn, socket, signUp, login, verifyUser, logout };
     return(
         <UserContext.Provider value={value}>
             {children}

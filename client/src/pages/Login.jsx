@@ -20,7 +20,7 @@ const Login = () => {
             <h1 className="text-center text-blue-900 text-4xl font-semibold sm:text-5xl md:text-6xl lg:text-5xl">User Login</h1>
             <form className="flex flex-col items-center gap-6 bg-slate-950 px-10 py-5 rounded-2xl shadow-2xl">
                 <div>
-                    <img src={circleUserIcon} alt="circleUserIcon" className="w-20 h-20 sm:w-30 sm:h-30"/>
+                    <img src={circleUserIcon} alt="circleUserIcon" className="w-20 h-20 sm:w-30 sm:h-30 xl:w-25 xl:h-25"/>
                 </div>
                 <div className="flex flex-col justify-center gap-1">
                     <h1 className="text-white">Email</h1>
@@ -32,10 +32,10 @@ const Login = () => {
                 </div>
                 <button onClick={(event) => handleLogin(event)} className="bg-blue-900 text-white px-4 py-1.5 rounded cursor-pointer hover:bg-blue-800 transition-all duration-400 ease-in-out">Login</button>
                 <div className="flex justify-center items-center">
-                    <h1 onClick={() => setCurrentState("signup")} className="text-white cursor-pointer text-sm sm:text-base">Don't have an account?</h1>
+                    <h1 onClick={() => setCurrentState("signup")} className="text-white cursor-pointer text-sm hover:underline sm:text-base">Don't have an account?</h1>
                 </div>
                 <div className="flex justify-center items-center">
-                    <h1 className="text-white cursor-pointer text-sm sm:text-base">Forgot Password?</h1>
+                    <h1 className="text-white cursor-pointer text-sm hover:underline sm:text-base">Forgot Password?</h1>
                 </div>
             </form>
         </div>
