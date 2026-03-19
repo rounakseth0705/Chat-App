@@ -14,8 +14,7 @@ const AuthProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const navigate = useNavigate();
     const connectToSocket = (userId) => {
-        if (!userId) {
-            toast.error("Can't load chats");
+        if (!userId || socket?.connected) {
             return;
         }
         const newSocket = io(import.meta.env.VITE_BACKEND_URL, { query: { userId } });

@@ -2,7 +2,7 @@ import ellipsisIcon from "../assets/ellipsis.svg";
 import userIcon from "../assets/user.svg";
 import landscapeIcon from "../assets/landscape.svg";
 import sendIcon from "../assets/send.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../context/AuthContext.jsx";
@@ -10,10 +10,10 @@ import { MessageContext } from "../context/MessageContext.jsx";
 
 const Chats = () => {
     const { user, logout } = useContext(UserContext);
-    const { sendMessage } = useContext(MessageContext);
-    const [selectedUserId, setSelectedUserId] = useState(null);
+    const { sendMessage, selectedUser, setSelectedUser, messages } = useContext(MessageContext);
     const [isLeftMenuClicked, setIsLeftMenuClicked] = useState(false);
     const [text, setText] = useState("");
+    const [image, setImage] = useState(null);
     const navigate = useNavigate();
     const handleNavigateToRequests = () => {
         if (isLeftMenuClicked) {
@@ -36,7 +36,8 @@ const Chats = () => {
         }
     }
     const handleSendMessage = async () => {
-        await sendMessage(text,selectedUserId);
+        await sendMessage(text,selectedUser._id,image);
+        setText("");
     }
     return(
         <div className="flex bg-slate-950 h-screen w-screen">
@@ -55,10 +56,10 @@ const Chats = () => {
                 </div>
                 <div className="bg-slate-900 rounded w-full py-2 px-1 overflow-auto sm:px-2">
                     { user?.connectedUsers.length > 0 ?
-                        user?.connectedUsers.map((index,connectedUser) => (
-                            <div key={index} onClick={() => setSelectedUserId(connectedUser._id)} className="flex justify-start items-center gap-1.5 py-2 px-1 rounded-2xl cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2">
+                        user?.connectedUsers.map((connectedUser,index) => (
+                            <div key={index} onClick={() => setSelectedUser(connectedUser)} className={`flex justify-start items-center gap-1.5 ${selectedUser?._id === connectedUser._id ? "bg-slate-500" : ""} py-2 px-1 rounded-2xl cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2`}>
                                 <span className="rounded-full bg-slate-600 p-1">
-                                    <img src={connectedUser.profilePicUrl.length > 0 ? connectedUser.profilePicUrl : userIcon} alt="" className="w-5 h-5 rounded-full sm:w-8 sm:h-8"/>
+                                    <img src={connectedUser?.profilePicUrl ? connectedUser.profilePicUrl : userIcon} alt="" className="w-5 h-5 rounded-full sm:w-8 sm:h-8"/>
                                 </span>
                                 <h1 className="text-white text-sm sm:text-base">{connectedUser.name}</h1>
                             </div>
@@ -67,14 +68,14 @@ const Chats = () => {
                 </div>
             </div>
             <div className="w-[55vw] sm:w-[62vw] md:w-[67vw] lg:w-[70vw] xl:w-[75vw]">
-                { selectedUserId ?
+                { selectedUser ?
                     <div className="flex flex-col justify-between w-full h-screen">
                         <div className="flex justify-between items-center py-3 px-1 bg-slate-800 sm:px-3">
                             <span className="flex justify-center items-center gap-1.5 sm:px-5 sm:gap-3 md:gap-5">
                                 <span className="rounded-full bg-slate-600 p-1">
                                     <img src={userIcon} alt="" className="w-6 h-6 sm:w-8 sm:h-8"/>
                                 </span>
-                                <h1 className="text-white text-sm sm:text-base">User Name</h1>
+                                <h1 className="text-white text-xs sm:text-base">{selectedUser.name}</h1>
                             </span>
                             <span className="flex justify-center items-center">
                                 <span>
@@ -82,7 +83,12 @@ const Chats = () => {
                                 </span>
                             </span>
                         </div>
-                        <div className="overflow-auto">
+                        <div className="grid grid-cols-1 overflow-auto">
+                            { messages.length > 0 &&
+                                messages.map((message,index) => (
+                                    <h1 key={index} className={`flex ${message.senderId === user._id && message.receiverId === selectedUser._id ? "justify-end" : "justify-start"} text-white`}>{message.text}</h1>
+                                ))
+                            }
                         </div>
                         <div className="pb-2 px-1 sm:px-3">
                             <div className="flex justify-between items-center w-full bg-slate-800 rounded-4xl py-3 px-1.5 sm:px-5 md:rounded-full md:py-5 lg:py-4 lg:rounded-4xl">

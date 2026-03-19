@@ -76,6 +76,9 @@ export const sendConnectionRequest = async (req,res) => {
         if (!user) {
             return res.json({ success: false, message: "Something went wrong!" });
         }
+        if (email === user.email) {
+            return res.json({ success: false, message: "Can't send the request" });
+        }
         const receiver = await User.findOne({ email });
         if (!receiver) {
             return res.json({ success: false, message: "Invalid email id" });
@@ -84,7 +87,7 @@ export const sendConnectionRequest = async (req,res) => {
             return res.json({ success: false, message: "Can't request the user again!" });
         }
         if (receiver.connectedUsers.includes(senderId) || user.connectedUsers.includes(receiver._id)) {
-            return res.json({});
+            return res.json({ success: false, message: "Already connected" });
         }
         receiver.pendingRequests.push(senderId);
         await receiver.save();
