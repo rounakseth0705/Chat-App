@@ -1,7 +1,6 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { nanoid } from "nanoid";
 
 export const register = async (req,res) => {
     try {
@@ -14,7 +13,7 @@ export const register = async (req,res) => {
         }
         const isUserExists = await User.findOne({ email });
         if (isUserExists) {
-            return res.json({ success: false, message: "Mobile or email already exists" });
+            return res.json({ success: false, message: "Email already exists" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({ name, email, password: hashedPassword });

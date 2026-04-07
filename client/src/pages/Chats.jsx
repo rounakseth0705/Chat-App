@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../context/AuthContext.jsx";
 import { MessageContext } from "../context/MessageContext.jsx";
+import { useRef } from "react";
 
 const Chats = () => {
     const { user, logout } = useContext(UserContext);
@@ -15,6 +16,7 @@ const Chats = () => {
     const [text, setText] = useState("");
     const [image, setImage] = useState(null);
     const navigate = useNavigate();
+    const chatBox = useRef(null);
     const handleNavigateToRequests = () => {
         if (isLeftMenuClicked) {
             navigate("/pending-requests");
@@ -39,9 +41,14 @@ const Chats = () => {
         await sendMessage(text,selectedUser._id,image);
         setText("");
     }
+    useEffect(() => {
+        if (chatBox.current) {
+            chatBox.current.scrollTop = chatBox.current?.scrollHeight;
+        }
+    },[messages]);
     return(
         <div className="flex bg-slate-950 h-screen w-screen">
-            <div onClick={handleIsLeftMenuClicked} className="flex flex-col items-center gap-5 w-[45vw] bg-slate-800 py-6 px-1.5 sm:gap-8 sm:px-3 sm:w-[38vw] md:py-10 md:w-[33vw] lg:gap-6 lg:w-[30vw] lg:py-8 xl:w-[25vw] xl:py-6">
+            <div onClick={handleIsLeftMenuClicked} className="flex flex-col items-center gap-5 w-[45vw] border-r bg-slate-800 py-6 px-1.5 sm:gap-8 sm:px-3 sm:w-[38vw] md:py-10 md:w-[33vw] lg:gap-6 lg:w-[30vw] lg:py-8 xl:w-[25vw] xl:py-6">
                 <div className="flex justify-between items-center w-full px-1.5 sm:px-3">
                     <h1 className="text-white text-sm font-semibold sm:text-base">Hi, {user?.name.split(" ")[0]}! ✋</h1>
                     <img onClick={() => setIsLeftMenuClicked(prev => !prev)} src={ellipsisIcon} alt="" className="w-5 h-5 cursor-pointer sm:w-6 sm:h-6"/>
@@ -57,7 +64,7 @@ const Chats = () => {
                 <div className="bg-slate-900 rounded w-full py-2 px-1 overflow-auto sm:px-2">
                     { user?.connectedUsers.length > 0 ?
                         user?.connectedUsers.map((connectedUser,index) => (
-                            <div key={index} onClick={() => setSelectedUser(connectedUser)} className={`flex justify-start items-center gap-1.5 ${selectedUser?._id === connectedUser._id ? "bg-slate-500" : ""} py-2 px-1 rounded-2xl cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2`}>
+                            <div key={index} onClick={() => setSelectedUser(connectedUser)} className={`flex justify-start items-center gap-1.5 ${selectedUser?._id === connectedUser._id ? "bg-slate-500" : ""} py-2 px-1 rounded cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2`}>
                                 <span className="rounded-full bg-slate-600 p-1">
                                     <img src={connectedUser?.profilePicUrl ? connectedUser.profilePicUrl : userIcon} alt="" className="w-5 h-5 rounded-full sm:w-8 sm:h-8"/>
                                 </span>
@@ -70,7 +77,7 @@ const Chats = () => {
             <div className="w-[55vw] sm:w-[62vw] md:w-[67vw] lg:w-[70vw] xl:w-[75vw]">
                 { selectedUser ?
                     <div className="flex flex-col justify-between w-full h-screen">
-                        <div className="flex justify-between items-center py-3 px-1 bg-slate-800 sm:px-3">
+                        <div className="flex justify-between items-center py-3 px-1 bg-slate-800 shadow-2xl h-[10%] sm:px-3">
                             <span className="flex justify-center items-center gap-1.5 sm:px-5 sm:gap-3 md:gap-5">
                                 <span className="rounded-full bg-slate-600 p-1">
                                     <img src={userIcon} alt="" className="w-6 h-6 sm:w-8 sm:h-8"/>
@@ -83,14 +90,19 @@ const Chats = () => {
                                 </span>
                             </span>
                         </div>
-                        <div className="grid grid-cols-1 overflow-auto">
+                        <div ref={chatBox} className="flex flex-col overflow-auto px-15 h-[80%] py-[1vh]">
                             { messages.length > 0 &&
                                 messages.map((message,index) => (
-                                    <h1 key={index} className={`flex ${message.senderId === user._id && message.receiverId === selectedUser._id ? "justify-end" : "justify-start"} text-white`}>{message.text}</h1>
+                                    <span key={index} className={`flex ${message.senderId === user._id && message.receiverId === selectedUser._id ? "justify-end" : "justify-start"}`}>
+                                        <span className={`flex ${message.senderId === user._id && message.receiverId === selectedUser._id ? "bg-linear-to-r from-blue-400 to-purple-400" : "bg-slate-600"} gap-1.5 rounded my-[0.2vh] px-[0.5vw] text-white`}>
+                                            <h1 className="flex items-center my-[1vh]">{message.text}</h1>
+                                            <h1 className="flex items-end text-sm">{new Date(message.createdAt).toLocaleTimeString("en-IN",{ hour: "numeric", minute: "2-digit", hour12: true })}</h1>
+                                        </span>
+                                    </span>
                                 ))
                             }
                         </div>
-                        <div className="pb-2 px-1 sm:px-3">
+                        <div className="pb-2 px-1 h-[10%] sm:px-3">
                             <div className="flex justify-between items-center w-full bg-slate-800 rounded-4xl py-3 px-1.5 sm:px-5 md:rounded-full md:py-5 lg:py-4 lg:rounded-4xl">
                                 <span className="rounded-full pr-1">
                                     <img src={landscapeIcon} className="w-5 h-5 cursor-pointer sm:w-7 sm:h-7"/>
