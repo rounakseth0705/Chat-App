@@ -15,6 +15,8 @@ const Chats = () => {
     const [isLeftMenuClicked, setIsLeftMenuClicked] = useState(false);
     const [text, setText] = useState("");
     const [image, setImage] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [resultUsers, setResultUsers] = useState([]);
     const navigate = useNavigate();
     const chatBox = useRef(null);
     const handleNavigateToRequests = () => {
@@ -46,6 +48,10 @@ const Chats = () => {
             chatBox.current.scrollTop = chatBox.current?.scrollHeight;
         }
     },[messages]);
+    useEffect(() => {
+        const result = user?.connectedUsers.filter(connectedUser => connectedUser.name.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+        setResultUsers(result);
+    },[searchQuery]);
     return(
         <div className="flex bg-slate-950 h-screen w-screen">
             <div onClick={handleIsLeftMenuClicked} className="flex flex-col items-center gap-5 w-[45vw] border-r bg-slate-800 py-6 px-1.5 sm:gap-8 sm:px-3 sm:w-[38vw] md:py-10 md:w-[33vw] lg:gap-6 lg:w-[30vw] lg:py-8 xl:w-[25vw] xl:py-6">
@@ -59,10 +65,10 @@ const Chats = () => {
                     <h1 onClick={handleLogout} className="py-1 px-2 cursor-pointer hover:bg-slate-900 transition-all duration-400 ease-in-out">Logout</h1>
                 </span>
                 <div>
-                    <input type="text" placeholder="Search user" className="bg-gray-500 w-[42vw] text-sm rounded-3xl px-4 py-1 sm:py-2 sm:px-6 sm:w-[34vw] sm:text-base md:w-[30vw] lg:w-[27vw] xl:w-[22vw]"/>
+                    <input onChange={(event) => setSearchQuery(event.target.value)} value={searchQuery} type="text" placeholder="Search user" className="bg-gray-500 w-[42vw] text-sm rounded-3xl px-4 py-1 sm:py-2 sm:px-6 sm:w-[34vw] sm:text-base md:w-[30vw] lg:w-[27vw] xl:w-[22vw]"/>
                 </div>
                 <div className="bg-slate-900 rounded w-full py-2 px-1 overflow-auto sm:px-2">
-                    { user?.connectedUsers.length > 0 ?
+                    { user?.connectedUsers.length > 0 && searchQuery === "" ?
                         user?.connectedUsers.map((connectedUser,index) => (
                             <div key={index} onClick={() => setSelectedUser(connectedUser)} className={`flex justify-start items-center gap-1.5 ${selectedUser?._id === connectedUser._id ? "bg-slate-500" : ""} py-2 px-1 rounded cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2`}>
                                 <span className="rounded-full bg-slate-600 p-1">
@@ -70,7 +76,16 @@ const Chats = () => {
                                 </span>
                                 <h1 className="text-white text-sm sm:text-base">{connectedUser.name}</h1>
                             </div>
-                        )) : <div>Find peoples to connect.</div>
+                        )) : searchQuery !== "" ?
+                        resultUsers?.map((connectedUser,index) => (
+                            <div key={index} onClick={() => setSelectedUser(connectedUser)} className={`flex justify-start items-center gap-1.5 ${selectedUser?._id === connectedUser._id ? "bg-slate-500" : ""} py-2 px-1 rounded cursor-pointer hover:bg-slate-500 duration-600 ease-in-out sm:gap-5 sm:px-2`}>
+                                <span className="rounded-full bg-slate-600 p-1">
+                                    <img src={connectedUser?.profilePicUrl ? connectedUser.profilePicUrl : userIcon} alt="" className="w-5 h-5 rounded-full sm:w-8 sm:h-8"/>
+                                </span>
+                                <h1 className="text-white text-sm sm:text-base">{connectedUser.name}</h1>
+                            </div>
+                        )) :
+                        <div>Find peoples to connect.</div>
                     }
                 </div>
             </div>
